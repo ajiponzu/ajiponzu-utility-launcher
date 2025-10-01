@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { RegisteredApp } from "../types";
 import "./Settings.css";
+import "../responsive.css";
+import "../settings-theme.css";
 
 interface SettingsProps {
   onClose: () => void;

@@ -3,6 +3,8 @@ import { invoke } from "@tauri-apps/api/core";
 import Settings from "./components/Settings";
 import { RegisteredApp } from "./types";
 import "./App.css";
+import "./responsive.css";
+import "./app-theme.css";
 
 function App() {
   const [showSettings, setShowSettings] = useState(false);

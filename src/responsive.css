@@ -1,0 +1,286 @@
+/* レスポンシブデザイン - ウィンドウサイズに合わせた自動調整 */
+
+/* 基本的なビューポート単位を使用したスケーリング */
+@media (min-width: 600px) {
+  :root {
+    font-size: calc(14px + 0.5vw);
+  }
+
+  .app-container {
+    padding: calc(20px + 1vw);
+  }
+
+  .header h1 {
+    font-size: calc(20px + 1vw) !important;
+  }
+
+  .header-buttons {
+    gap: calc(8px + 0.5vw) !important;
+  }
+
+  .settings-btn,
+  .hide-btn {
+    padding: calc(8px + 0.5vw) calc(12px + 1vw) !important;
+    font-size: calc(14px + 0.3vw) !important;
+    border-radius: calc(6px + 0.3vw) !important;
+  }
+
+  .app-item {
+    padding: calc(20px + 1vw) !important;
+    border-radius: calc(8px + 0.5vw) !important;
+  }
+
+  .app-info h3 {
+    font-size: calc(16px + 0.8vw) !important;
+  }
+
+  .app-info p {
+    font-size: calc(14px + 0.5vw) !important;
+  }
+
+  .launch-btn,
+  .stop-btn {
+    padding: calc(10px + 0.5vw) calc(20px + 1vw) !important;
+    font-size: calc(14px + 0.5vw) !important;
+    border-radius: calc(6px + 0.3vw) !important;
+  }
+
+  .apps-list {
+    gap: calc(16px + 1vw) !important;
+  }
+
+  .prevent-duplicate-badge,
+  .auto-start-badge {
+    font-size: calc(12px + 0.3vw) !important;
+    padding: calc(2px + 0.2vw) calc(8px + 0.5vw) !important;
+    border-radius: calc(12px + 0.5vw) !important;
+    margin-left: calc(8px + 0.5vw) !important;
+  }
+
+  /* Settings Modal レスポンシブ対応 */
+  .settings-modal {
+    width: calc(85% + 1vw) !important;
+    max-width: calc(800px + 10vw) !important;
+    border-radius: calc(8px + 0.5vw) !important;
+  }
+
+  .settings-header {
+    padding: calc(16px + 1vw) calc(20px + 1.5vw) !important;
+  }
+
+  .settings-header h2 {
+    font-size: calc(18px + 0.8vw) !important;
+  }
+
+  .close-btn {
+    font-size: calc(18px + 0.5vw) !important;
+    padding: calc(4px + 0.3vw) calc(8px + 0.5vw) !important;
+    border-radius: calc(4px + 0.3vw) !important;
+  }
+
+  .settings-content {
+    padding: calc(20px + 1.5vw) !important;
+  }
+
+  .section-header h3 {
+    font-size: calc(16px + 0.6vw) !important;
+  }
+
+  .add-btn {
+    padding: calc(8px + 0.5vw) calc(16px + 1vw) !important;
+    font-size: calc(14px + 0.4vw) !important;
+    border-radius: calc(4px + 0.3vw) !important;
+  }
+
+  .app-card {
+    padding: calc(16px + 1vw) !important;
+    border-radius: calc(6px + 0.4vw) !important;
+  }
+
+  .app-details h4 {
+    font-size: calc(14px + 0.5vw) !important;
+    margin-bottom: calc(8px + 0.5vw) !important;
+  }
+
+  .app-path,
+  .app-args,
+  .app-description {
+    font-size: calc(12px + 0.3vw) !important;
+    margin: calc(4px + 0.2vw) 0 !important;
+  }
+
+  .status,
+  .delay,
+  .prevent-duplicate,
+  .auto-start {
+    font-size: calc(11px + 0.3vw) !important;
+    padding: calc(2px + 0.2vw) calc(6px + 0.4vw) !important;
+    border-radius: calc(3px + 0.2vw) !important;
+  }
+
+  .app-actions {
+    gap: calc(8px + 0.5vw) !important;
+  }
+
+  .edit-btn,
+  .delete-btn {
+    padding: calc(6px + 0.4vw) calc(12px + 0.8vw) !important;
+    font-size: calc(12px + 0.3vw) !important;
+    border-radius: calc(4px + 0.2vw) !important;
+  }
+
+  /* フォーム要素のレスポンシブ対応 */
+  .form-section h3 {
+    font-size: calc(16px + 0.6vw) !important;
+    margin-bottom: calc(16px + 1vw) !important;
+  }
+
+  .form-group {
+    margin-bottom: calc(16px + 1vw) !important;
+  }
+
+  .form-group label {
+    font-size: calc(14px + 0.4vw) !important;
+    margin-bottom: calc(6px + 0.4vw) !important;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: calc(8px + 0.5vw) calc(12px + 0.8vw) !important;
+    font-size: calc(14px + 0.4vw) !important;
+    border-radius: calc(4px + 0.2vw) !important;
+  }
+
+  .file-input-wrapper {
+    gap: calc(8px + 0.5vw) !important;
+  }
+
+  .file-input-wrapper button {
+    padding: calc(8px + 0.5vw) calc(16px + 1vw) !important;
+    font-size: calc(14px + 0.4vw) !important;
+    border-radius: calc(4px + 0.2vw) !important;
+  }
+
+  .checkbox-group label {
+    font-size: calc(14px + 0.4vw) !important;
+    gap: calc(8px + 0.4vw) !important;
+  }
+
+  .save-btn,
+  .cancel-btn {
+    padding: calc(10px + 0.6vw) calc(20px + 1.2vw) !important;
+    font-size: calc(14px + 0.5vw) !important;
+    border-radius: calc(4px + 0.3vw) !important;
+  }
+
+  .form-actions {
+    gap: calc(12px + 0.8vw) !important;
+    margin-top: calc(20px + 1.5vw) !important;
+  }
+}
+
+/* 大画面向けの追加調整 */
+@media (min-width: 800px) {
+  :root {
+    font-size: calc(16px + 0.8vw);
+  }
+
+  .header {
+    margin-bottom: calc(24px + 2vw) !important;
+    padding-bottom: calc(16px + 1vw) !important;
+  }
+
+  .app-container {
+    padding: calc(24px + 2vw);
+  }
+
+  /* Settings大画面調整 */
+  .settings-modal {
+    max-width: calc(900px + 5vw) !important;
+  }
+
+  .settings-content {
+    padding: calc(24px + 2vw) !important;
+  }
+
+  .apps-section {
+    margin-bottom: calc(30px + 2vw) !important;
+  }
+}
+
+/* 最大値の制限 */
+@media (min-width: 1200px) {
+  :root {
+    font-size: 24px;
+  }
+
+  .app-container {
+    padding: 48px;
+  }
+
+  .header h1 {
+    font-size: 32px !important;
+  }
+
+  .app-info h3 {
+    font-size: 22px !important;
+  }
+
+  .launch-btn,
+  .stop-btn {
+    font-size: 18px !important;
+    padding: 16px 32px !important;
+  }
+
+  /* Settings最大値制限 */
+  .settings-modal {
+    max-width: 1000px !important;
+  }
+
+  .settings-header h2 {
+    font-size: 24px !important;
+  }
+
+  .settings-content {
+    padding: 48px !important;
+  }
+
+  .section-header h3 {
+    font-size: 20px !important;
+  }
+
+  .add-btn {
+    font-size: 16px !important;
+    padding: 12px 24px !important;
+  }
+
+  .app-details h4 {
+    font-size: 18px !important;
+  }
+
+  .app-path,
+  .app-args,
+  .app-description {
+    font-size: 15px !important;
+  }
+
+  .form-section h3 {
+    font-size: 20px !important;
+  }
+
+  .form-group label {
+    font-size: 16px !important;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    font-size: 16px !important;
+    padding: 12px 16px !important;
+  }
+
+  .save-btn,
+  .cancel-btn {
+    font-size: 16px !important;
+    padding: 14px 28px !important;
+  }
+}

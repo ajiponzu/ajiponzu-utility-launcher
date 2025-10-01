@@ -1,0 +1,190 @@
+/* App.tsx用 - 味ぽん本体テーマ（赤茶色・濃いめ） */
+
+/* 味ぽん本体カラーパレット */
+:root {
+  --ajipon-dark-primary: #8d4004; /* 濃い赤茶色 */
+  --ajipon-dark-secondary: #a0522d; /* シエナ */
+  --ajipon-dark-accent: #cd853f; /* ペルー */
+  --ajipon-dark-gradient: linear-gradient(
+    135deg,
+    #5d2c04 0%,
+    #8d4004 50%,
+    #a0522d 100%
+  );
+
+  /* テキストカラー（明るめ） */
+  --text-light: #ffffff;
+  --text-cream: #ffeaa7;
+  --text-orange: #fdcb6e;
+}
+
+/* 全体背景 - 白余白を完全に削除 */
+html,
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: var(--ajipon-dark-gradient) !important;
+  min-height: 100vh !important;
+  overflow-x: hidden !important;
+}
+
+/* アプリコンテナ - 余白削除、画面全体に */
+.app-container {
+  background: rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.3) !important;
+  margin: 0 !important;
+  padding: 20px !important;
+  min-height: 100vh !important;
+  color: var(--text-light) !important;
+}
+
+/* ヘッダー部分 */
+.header {
+  background: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0 !important;
+  margin: -20px -20px 20px -20px !important;
+  padding: 20px !important;
+}
+
+.header h1 {
+  color: var(--text-cream) !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7) !important;
+  font-weight: 700 !important;
+}
+
+/* ボタン */
+.settings-btn,
+.hide-btn {
+  background: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: var(--text-orange) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.settings-btn:hover,
+.hide-btn:hover {
+  background: rgba(0, 0, 0, 0.6) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+  color: var(--text-cream) !important;
+}
+
+/* アプリアイテム */
+.app-item {
+  background: rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+  transition: all 0.3s ease !important;
+}
+
+.app-item:hover {
+  background: rgba(0, 0, 0, 0.5) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.app-info h3 {
+  color: var(--text-cream) !important;
+  font-weight: 600 !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.app-info p {
+  color: var(--text-orange) !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 起動・停止ボタン */
+.launch-btn {
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%) !important;
+  backdrop-filter: blur(3px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  transition: all 0.3s ease !important;
+  color: white !important;
+  font-weight: 600 !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.launch-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%) !important;
+}
+
+.stop-btn {
+  background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%) !important;
+  backdrop-filter: blur(3px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  transition: all 0.3s ease !important;
+  color: white !important;
+  font-weight: 600 !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.stop-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+}
+
+/* バッジ */
+.prevent-duplicate-badge {
+  background: linear-gradient(
+    135deg,
+    var(--ajipon-dark-primary) 0%,
+    var(--ajipon-dark-accent) 100%
+  ) !important;
+  backdrop-filter: blur(2px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  color: white !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.auto-start-badge {
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%) !important;
+  backdrop-filter: blur(2px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  color: white !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* アプリ追加ボタン */
+.add-app-btn {
+  background: var(--ajipon-dark-gradient) !important;
+  backdrop-filter: blur(3px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+  transition: all 0.3s ease !important;
+  font-weight: 600 !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.add-app-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 空状態 */
+.no-apps {
+  color: var(--text-cream) !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
