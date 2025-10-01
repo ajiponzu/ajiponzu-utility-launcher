@@ -183,10 +183,14 @@ async fn launch_application(
     path: String,
     arguments: String,
 ) -> Result<(), String> {
-    // 登録されたアプリケーションかどうかを確認
+    // 登録されたアプリケーションの情報を確認
     let state: tauri::State<AppState> = app.state();
     let config = state.config.lock().unwrap();
-    let is_registered_app = config.registered_apps.iter().any(|app| app.id == app_id);
+    let registered_app = config.registered_apps.iter().find(|app| app.id == app_id);
+    let is_registered_app = registered_app.is_some();
+    let prevent_duplicate = registered_app
+        .map(|app| app.prevent_duplicate)
+        .unwrap_or(false);
     drop(config);
 
     if is_registered_app {
@@ -219,9 +223,22 @@ async fn launch_application(
                 let pid_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
                 if let Ok(actual_pid) = pid_str.parse::<u32>() {
                     println!("Started application with PID: {}", actual_pid);
-                    // 実際のプロセスIDを記録
+
                     let mut processes = state.running_processes.lock().unwrap();
-                    processes.insert(app_id, actual_pid);
+
+                    if prevent_duplicate {
+                        // 重複起動禁止の場合は特別なキーでプロセス名ベース管理を示す
+                        processes.insert(format!("{}:name", app_id), 0);
+                        println!(
+                            "Stored process name tracking for app_id: {} (prevent_duplicate)",
+                            app_id
+                        );
+                    } else {
+                        // 通常の場合はプロセスIDで記録
+                        processes.insert(app_id.clone(), actual_pid);
+                        println!("Stored PID {} for app_id: {}", actual_pid, app_id);
+                    }
+
                     return Ok(());
                 } else {
                     return Err(format!("Failed to parse process ID: {}", pid_str));
@@ -272,30 +289,92 @@ async fn launch_application(
 fn stop_application(app: AppHandle, app_id: String) -> Result<(), String> {
     let state: tauri::State<AppState> = app.state();
 
-    // 登録されたアプリケーションの場合、プロセス名を取得
+    // 登録されたアプリケーションの情報を取得
     let config = state.config.lock().unwrap();
     let registered_app = config.registered_apps.iter().find(|app| app.id == app_id);
-    let process_name = if let Some(app) = registered_app {
-        // パスからファイル名を抽出し、拡張子を除去
-        let path = &app.path;
-        let file_name = path
-            .split(['/', '\\']) // WindowsとUnixの両方のパス区切り文字に対応
-            .last()
-            .unwrap_or(path);
-        file_name.trim_end_matches(".exe").to_string()
+    let prevent_duplicate = registered_app
+        .map(|app| app.prevent_duplicate)
+        .unwrap_or(false);
+    let app_path = registered_app.map(|app| app.path.clone());
+    drop(config);
+
+    // プロセス管理テーブルから確認
+    let mut processes = state.running_processes.lock().unwrap();
+
+    // 重複起動禁止の場合は特別なキーで確認
+    let process_key = if prevent_duplicate {
+        format!("{}:name", app_id)
     } else {
-        // システムツールの場合は従来通りプロセスIDを使用
-        drop(config);
-        let mut processes = state.running_processes.lock().unwrap();
-        if let Some(pid) = processes.remove(&app_id) {
-            println!(
-                "Attempting to stop system tool process ID: {} for app: {}",
-                pid, app_id
-            );
+        app_id.clone()
+    };
+
+    let pid = processes.get(&process_key).copied();
+
+    if let Some(pid) = pid {
+        processes.remove(&process_key);
+        drop(processes);
+
+        if prevent_duplicate {
+            // 重複起動禁止の場合はプロセス名で停止
+            if let Some(path) = app_path {
+                let file_name = path.split(['/', '\\']).last().unwrap_or(&path);
+                let process_name = file_name.trim_end_matches(".exe").to_string();
+
+                println!(
+                    "Attempting to stop process by name: {} for app: {} (prevent_duplicate)",
+                    process_name, app_id
+                );
+
+                #[cfg(target_os = "windows")]
+                {
+                    let output = Command::new("powershell")
+                        .args(&[
+                            "-WindowStyle",
+                            "Hidden",
+                            "-Command",
+                            &format!("Stop-Process -Name '{}' -Force", process_name),
+                        ])
+                        .output();
+
+                    return match output {
+                        Ok(result) => {
+                            if result.status.success() {
+                                println!("Successfully stopped process by name: {}", process_name);
+                                Ok(())
+                            } else {
+                                let error_msg = String::from_utf8_lossy(&result.stderr);
+                                println!("Stop-Process by name failed: {}", error_msg);
+                                Err(format!(
+                                    "Failed to stop process '{}': {}",
+                                    process_name, error_msg
+                                ))
+                            }
+                        }
+                        Err(e) => {
+                            println!("Failed to execute Stop-Process by name: {}", e);
+                            Err(format!(
+                                "Failed to stop application with Stop-Process: {}",
+                                e
+                            ))
+                        }
+                    };
+                }
+
+                #[cfg(not(target_os = "windows"))]
+                {
+                    return Err(
+                        "Process name based termination not supported on this platform".to_string(),
+                    );
+                }
+            } else {
+                return Err("Application path not found".to_string());
+            }
+        } else {
+            // 通常のアプリの場合はPIDで停止
+            println!("Attempting to stop process ID: {} for app: {}", pid, app_id);
 
             #[cfg(target_os = "windows")]
             {
-                use std::process::Command;
                 let output = Command::new("powershell")
                     .args(&[
                         "-WindowStyle",
@@ -328,7 +407,6 @@ fn stop_application(app: AppHandle, app_id: String) -> Result<(), String> {
 
             #[cfg(not(target_os = "windows"))]
             {
-                use std::process::Command;
                 let output = Command::new("kill")
                     .args(&["-9", &pid.to_string()])
                     .output();
@@ -338,76 +416,10 @@ fn stop_application(app: AppHandle, app_id: String) -> Result<(), String> {
                     Err(e) => Err(format!("Failed to stop application: {}", e)),
                 };
             }
-        } else {
-            return Err("Application not running".to_string());
-        }
-    };
-    drop(config);
-
-    // 登録されたアプリケーションの場合：プロセス名で停止
-    println!(
-        "Attempting to stop process by name: {} for app: {}",
-        process_name, app_id
-    );
-
-    #[cfg(target_os = "windows")]
-    {
-        use std::process::Command;
-        let output = Command::new("powershell")
-            .args(&[
-                "-WindowStyle",
-                "Hidden",
-                "-Command",
-                &format!("Stop-Process -Name '{}' -Force", process_name),
-            ])
-            .output();
-
-        // プロセス追跡からも削除
-        let mut processes = state.running_processes.lock().unwrap();
-        processes.remove(&app_id);
-
-        match output {
-            Ok(result) => {
-                if result.status.success() {
-                    println!("Successfully stopped process by name: {}", process_name);
-                    Ok(())
-                } else {
-                    let error_msg = String::from_utf8_lossy(&result.stderr);
-                    println!("Stop-Process by name failed: {}", error_msg);
-                    Err(format!(
-                        "Failed to stop process '{}': {}",
-                        process_name, error_msg
-                    ))
-                }
-            }
-            Err(e) => {
-                println!("Failed to execute Stop-Process by name: {}", e);
-                Err(format!(
-                    "Failed to stop application with Stop-Process: {}",
-                    e
-                ))
-            }
         }
     }
 
-    #[cfg(not(target_os = "windows"))]
-    {
-        // Windows以外では従来通りプロセスIDベース
-        let mut processes = state.running_processes.lock().unwrap();
-        if let Some(pid) = processes.remove(&app_id) {
-            use std::process::Command;
-            let output = Command::new("kill")
-                .args(&["-9", &pid.to_string()])
-                .output();
-
-            match output {
-                Ok(_) => Ok(()),
-                Err(e) => Err(format!("Failed to stop application: {}", e)),
-            }
-        } else {
-            Err("Application not running".to_string())
-        }
-    }
+    Err("Application not found or not running".to_string())
 }
 
 // アプリケーションの実行状態を確認
