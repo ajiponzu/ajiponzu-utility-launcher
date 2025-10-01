@@ -19,7 +19,6 @@ export default function Settings({ onClose }: SettingsProps) {
     path: "",
     arguments: "",
     description: "",
-    enabled: true,
     delay: 0,
     preventDuplicate: false,
     autoStart: false,
@@ -47,7 +46,6 @@ export default function Settings({ onClose }: SettingsProps) {
       path: "",
       arguments: "",
       description: "",
-      enabled: true,
       delay: 0,
       preventDuplicate: false,
       autoStart: false,
@@ -68,7 +66,6 @@ export default function Settings({ onClose }: SettingsProps) {
       path: app.path,
       arguments: app.arguments || "",
       description: app.description || "",
-      enabled: app.enabled,
       delay: app.delay || 0,
       preventDuplicate: app.prevent_duplicate || false,
       autoStart: app.auto_start || false,
@@ -92,7 +89,6 @@ export default function Settings({ onClose }: SettingsProps) {
           path: formData.path,
           arguments: formData.arguments,
           description: formData.description,
-          enabled: formData.enabled,
           delay: formData.delay,
           preventDuplicate: formData.preventDuplicate,
           autoStart: formData.autoStart,
@@ -104,7 +100,6 @@ export default function Settings({ onClose }: SettingsProps) {
           path: formData.path,
           arguments: formData.arguments,
           description: formData.description,
-          enabled: formData.enabled,
           delay: formData.delay,
           preventDuplicate: formData.preventDuplicate,
           autoStart: formData.autoStart,
@@ -190,8 +185,8 @@ export default function Settings({ onClose }: SettingsProps) {
                             <p className="app-description">{app.description}</p>
                           )}
                           <div className="app-settings">
-                            <span className={`status ${app.enabled ? 'enabled' : 'disabled'}`}>
-                              {app.enabled ? '有効' : '無効'}
+                            <span className={`status ${app.auto_start ? 'enabled' : 'disabled'}`}>
+                              {app.auto_start ? '自動起動' : '手動起動'}
                             </span>
                             {app.delay && app.delay > 0 && (
                               <span className="delay">遅延: {app.delay}秒</span>
@@ -276,17 +271,6 @@ export default function Settings({ onClose }: SettingsProps) {
                         value={formData.delay}
                         onChange={(e) => setFormData({ ...formData, delay: Number(e.target.value) })}
                       />
-                    </div>
-
-                    <div className="form-group checkbox-group">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={formData.enabled}
-                          onChange={(e) => setFormData({ ...formData, enabled: e.target.checked })}
-                        />
-                        有効
-                      </label>
                     </div>
 
                     <div className="form-group checkbox-group">

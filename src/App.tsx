@@ -25,20 +25,13 @@ function App() {
 
   const loadRunningApps = async () => {
     try {
-      // バックエンドから実行中プロセスを取得
-      const processes = await invoke<Record<string, number>>("get_running_processes");
-      const runningAppIds = Object.keys(processes).map(key => 
-        key.includes(':name') ? key.replace(':name', '') : key
-      );
-      
-      // 自動起動が有効なアプリも実行中として扱う
       const apps = await invoke<RegisteredApp[]>('get_registered_apps');
       const autoStartAppIds = apps
-        .filter(app => app.auto_start && app.enabled)
+        .filter(app => app.auto_start)
         .map(app => app.id);
-      
+
       // 実行中プロセスと自動起動アプリを合わせる
-      const allRunningIds = [...new Set([...runningAppIds, ...autoStartAppIds])];
+      const allRunningIds = [...new Set([...autoStartAppIds])];
       setRunningApps(new Set(allRunningIds));
     } catch (error) {
       console.error('Failed to load running apps:', error);
@@ -125,17 +118,13 @@ function App() {
           <div className="apps-list">
             {registeredApps.map((app) => {
               const isRunning = runningApps.has(app.id);
+              console.log(runningApps);
+              console.log(`App: ${app.name}, ID: ${app.id}, isRunning: ${isRunning}`);
               return (
                 <div key={app.id} className="app-item">
                   <div className="app-info">
                     <h3>{app.name}</h3>
                     <p>{app.description}</p>
-                    {app.prevent_duplicate && (
-                      <span className="prevent-duplicate-badge">重複起動禁止</span>
-                    )}
-                    {app.auto_start && (
-                      <span className="auto-start-badge">自動起動</span>
-                    )}
                   </div>
                   <div className="app-actions">
                     {!isRunning ? (

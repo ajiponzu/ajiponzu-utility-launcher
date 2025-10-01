@@ -18,7 +18,6 @@ pub struct RegisteredApp {
     pub path: String,
     pub arguments: String,
     pub description: String,
-    pub enabled: bool,
     pub delay: u64,
     #[serde(default, alias = "preventDuplicate")]
     pub prevent_duplicate: bool,
@@ -109,7 +108,6 @@ fn add_registered_app(
     path: String,
     arguments: String,
     description: String,
-    enabled: bool,
     delay: u64,
     prevent_duplicate: bool,
     auto_start: bool,
@@ -123,7 +121,6 @@ fn add_registered_app(
         path,
         arguments,
         description,
-        enabled,
         delay,
         prevent_duplicate,
         auto_start,
@@ -144,7 +141,6 @@ fn update_registered_app(
     path: String,
     arguments: String,
     description: String,
-    enabled: bool,
     delay: u64,
     prevent_duplicate: bool,
     auto_start: bool,
@@ -157,7 +153,6 @@ fn update_registered_app(
         app_entry.path = path;
         app_entry.arguments = arguments;
         app_entry.description = description;
-        app_entry.enabled = enabled;
         app_entry.delay = delay;
         app_entry.prevent_duplicate = prevent_duplicate;
         app_entry.auto_start = auto_start;
@@ -478,7 +473,7 @@ async fn launch_startup_apps(app: AppHandle) -> Result<(), String> {
     let state: tauri::State<AppState> = app.state();
     let config = state.config.lock().unwrap().clone();
 
-    for registered_app in config.registered_apps.iter().filter(|a| a.enabled) {
+    for registered_app in config.registered_apps.iter().filter(|a| a.auto_start) {
         let app_id = registered_app.id.clone();
         let path = registered_app.path.clone();
         let arguments = registered_app.arguments.clone();

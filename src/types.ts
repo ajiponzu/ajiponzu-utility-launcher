@@ -6,7 +6,6 @@ export interface RegisteredApp {
   path: string;
   arguments: string;
   description: string;
-  enabled: boolean;
   delay: number;
   prevent_duplicate: boolean;
   auto_start: boolean;
