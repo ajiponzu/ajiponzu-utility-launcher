@@ -22,6 +22,8 @@ pub struct RegisteredApp {
     pub delay: u64,
     #[serde(default, alias = "preventDuplicate")]
     pub prevent_duplicate: bool,
+    #[serde(default, alias = "autoStart")]
+    pub auto_start: bool,
 }
 
 // アプリケーション設定
@@ -110,6 +112,7 @@ fn add_registered_app(
     enabled: bool,
     delay: u64,
     prevent_duplicate: bool,
+    auto_start: bool,
 ) -> Result<RegisteredApp, String> {
     let state: tauri::State<AppState> = app.state();
     let mut config = state.config.lock().unwrap();
@@ -123,6 +126,7 @@ fn add_registered_app(
         enabled,
         delay,
         prevent_duplicate,
+        auto_start,
     };
 
     config.registered_apps.push(new_app.clone());
@@ -143,6 +147,7 @@ fn update_registered_app(
     enabled: bool,
     delay: u64,
     prevent_duplicate: bool,
+    auto_start: bool,
 ) -> Result<(), String> {
     let state: tauri::State<AppState> = app.state();
     let mut config = state.config.lock().unwrap();
@@ -155,6 +160,7 @@ fn update_registered_app(
         app_entry.enabled = enabled;
         app_entry.delay = delay;
         app_entry.prevent_duplicate = prevent_duplicate;
+        app_entry.auto_start = auto_start;
 
         save_config(&app, &config)?;
         Ok(())
@@ -197,55 +203,94 @@ async fn launch_application(
         // 登録されたアプリケーションの場合
         #[cfg(target_os = "windows")]
         {
-            // WindowsではStart-Processコマンドを使用し、-PassThruで実際のプロセスIDを取得
-            let quoted_path = format!("'{}'", path);
-            let mut powershell_command = format!(
-                "$process = Start-Process -FilePath {} -PassThru",
-                quoted_path
-            );
+            if prevent_duplicate {
+                // 重複起動禁止の場合はプロセスIDを取得せずシンプルに起動
+                let quoted_path = format!("'{}'", path);
+                let mut powershell_command = format!("Start-Process -FilePath {}", quoted_path);
 
-            if !arguments.trim().is_empty() {
-                let quoted_args = format!("'{}'", arguments);
-                powershell_command = format!(
-                    "$process = Start-Process -FilePath {} -ArgumentList {} -PassThru",
-                    quoted_path, quoted_args
+                if !arguments.trim().is_empty() {
+                    let quoted_args = format!("'{}'", arguments);
+                    powershell_command = format!(
+                        "Start-Process -FilePath {} -ArgumentList {}",
+                        quoted_path, quoted_args
+                    );
+                }
+
+                println!(
+                    "Executing simple launch command (prevent_duplicate): {}",
+                    powershell_command
                 );
-            }
 
-            powershell_command.push_str("; Write-Output $process.Id");
+                let output = Command::new("powershell")
+                    .args(&["-WindowStyle", "Hidden", "-Command", &powershell_command])
+                    .output()
+                    .map_err(|e| format!("Failed to launch application: {}", e))?;
 
-            let output = Command::new("powershell")
-                .args(&["-WindowStyle", "Hidden", "-Command", &powershell_command])
-                .output()
-                .map_err(|e| format!("Failed to launch application with Start-Process: {}", e))?;
+                if output.status.success() {
+                    println!(
+                        "Application launched successfully (prevent_duplicate, no PID tracking)"
+                    );
 
-            if output.status.success() {
-                let pid_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
-                if let Ok(actual_pid) = pid_str.parse::<u32>() {
-                    println!("Started application with PID: {}", actual_pid);
-
+                    // プロセス名ベース管理のマーカーを記録
                     let mut processes = state.running_processes.lock().unwrap();
-
-                    if prevent_duplicate {
-                        // 重複起動禁止の場合は特別なキーでプロセス名ベース管理を示す
-                        processes.insert(format!("{}:name", app_id), 0);
-                        println!(
-                            "Stored process name tracking for app_id: {} (prevent_duplicate)",
-                            app_id
-                        );
-                    } else {
-                        // 通常の場合はプロセスIDで記録
-                        processes.insert(app_id.clone(), actual_pid);
-                        println!("Stored PID {} for app_id: {}", actual_pid, app_id);
-                    }
+                    processes.insert(format!("{}:name", app_id), 0);
+                    println!(
+                        "Stored process name tracking for app_id: {} (prevent_duplicate)",
+                        app_id
+                    );
 
                     return Ok(());
                 } else {
-                    return Err(format!("Failed to parse process ID: {}", pid_str));
+                    let error_msg = String::from_utf8_lossy(&output.stderr);
+                    return Err(format!("Start-Process failed: {}", error_msg));
                 }
             } else {
-                let error_msg = String::from_utf8_lossy(&output.stderr);
-                return Err(format!("Start-Process failed: {}", error_msg));
+                // 通常の場合はプロセスIDを取得
+                let quoted_path = format!("'{}'", path);
+                let mut powershell_command = format!(
+                    "$process = Start-Process -FilePath {} -PassThru",
+                    quoted_path
+                );
+
+                if !arguments.trim().is_empty() {
+                    let quoted_args = format!("'{}'", arguments);
+                    powershell_command = format!(
+                        "$process = Start-Process -FilePath {} -ArgumentList {} -PassThru",
+                        quoted_path, quoted_args
+                    );
+                }
+
+                powershell_command.push_str("; Write-Output $process.Id");
+
+                println!(
+                    "Executing PID tracking launch command: {}",
+                    powershell_command
+                );
+
+                let output = Command::new("powershell")
+                    .args(&["-WindowStyle", "Hidden", "-Command", &powershell_command])
+                    .output()
+                    .map_err(|e| {
+                        format!("Failed to launch application with Start-Process: {}", e)
+                    })?;
+
+                if output.status.success() {
+                    let pid_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                    if let Ok(actual_pid) = pid_str.parse::<u32>() {
+                        println!("Started application with PID: {}", actual_pid);
+
+                        let mut processes = state.running_processes.lock().unwrap();
+                        processes.insert(app_id.clone(), actual_pid);
+                        println!("Stored PID {} for app_id: {}", actual_pid, app_id);
+
+                        return Ok(());
+                    } else {
+                        return Err(format!("Failed to parse process ID: {}", pid_str));
+                    }
+                } else {
+                    let error_msg = String::from_utf8_lossy(&output.stderr);
+                    return Err(format!("Start-Process failed: {}", error_msg));
+                }
             }
         }
 
@@ -295,7 +340,7 @@ fn stop_application(app: AppHandle, app_id: String) -> Result<(), String> {
     let prevent_duplicate = registered_app
         .map(|app| app.prevent_duplicate)
         .unwrap_or(false);
-    let app_path = registered_app.map(|app| app.path.clone());
+    let app_name = registered_app.map(|app| app.name.clone());
     drop(config);
 
     // プロセス管理テーブルから確認
@@ -315,11 +360,8 @@ fn stop_application(app: AppHandle, app_id: String) -> Result<(), String> {
         drop(processes);
 
         if prevent_duplicate {
-            // 重複起動禁止の場合はプロセス名で停止
-            if let Some(path) = app_path {
-                let file_name = path.split(['/', '\\']).last().unwrap_or(&path);
-                let process_name = file_name.trim_end_matches(".exe").to_string();
-
+            // 重複起動禁止の場合はアプリ名で停止
+            if let Some(process_name) = app_name {
                 println!(
                     "Attempting to stop process by name: {} for app: {} (prevent_duplicate)",
                     process_name, app_id
@@ -446,10 +488,7 @@ async fn launch_startup_apps(app: AppHandle) -> Result<(), String> {
 
         // 重複起動禁止が有効な場合、既存プロセスを停止
         if prevent_duplicate {
-            let process_name = {
-                let file_name = path.split(['/', '\\']).last().unwrap_or(&path);
-                file_name.trim_end_matches(".exe").to_string()
-            };
+            let process_name = registered_app.name.clone();
 
             println!("Preventing duplicate launch for: {}", process_name);
 

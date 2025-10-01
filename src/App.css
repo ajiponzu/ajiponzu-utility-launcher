@@ -152,6 +152,48 @@ body {
   background: #1976d2;
 }
 
+.stop-btn {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+.stop-btn:hover {
+  background: #d32f2f;
+}
+
+.prevent-duplicate-badge {
+  background: #ff9800;
+  color: white;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+  display: inline-block;
+}
+
+.auto-start-badge {
+  background: #4caf50;
+  color: white;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+  display: inline-block;
+}
+
+.app-actions {
+  display: flex;
+  gap: 8px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .app-container {

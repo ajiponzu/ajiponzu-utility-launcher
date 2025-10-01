@@ -22,6 +22,7 @@ export default function Settings({ onClose }: SettingsProps) {
     enabled: true,
     delay: 0,
     preventDuplicate: false,
+    autoStart: false,
   });
 
   useEffect(() => {
@@ -49,6 +50,7 @@ export default function Settings({ onClose }: SettingsProps) {
       enabled: true,
       delay: 0,
       preventDuplicate: false,
+      autoStart: false,
     });
     setShowAddForm(false);
     setEditingApp(null);
@@ -69,6 +71,7 @@ export default function Settings({ onClose }: SettingsProps) {
       enabled: app.enabled,
       delay: app.delay || 0,
       preventDuplicate: app.prevent_duplicate || false,
+      autoStart: app.auto_start || false,
     });
     setEditingApp(app);
     setShowAddForm(true);
@@ -92,6 +95,7 @@ export default function Settings({ onClose }: SettingsProps) {
           enabled: formData.enabled,
           delay: formData.delay,
           preventDuplicate: formData.preventDuplicate,
+          autoStart: formData.autoStart,
         });
       } else {
         // 新規アプリの追加
@@ -103,6 +107,7 @@ export default function Settings({ onClose }: SettingsProps) {
           enabled: formData.enabled,
           delay: formData.delay,
           preventDuplicate: formData.preventDuplicate,
+          autoStart: formData.autoStart,
         });
       }
       resetForm();
@@ -193,6 +198,9 @@ export default function Settings({ onClose }: SettingsProps) {
                             )}
                             {app.prevent_duplicate && (
                               <span className="prevent-duplicate">重複起動防止</span>
+                            )}
+                            {app.auto_start && (
+                              <span className="auto-start">自動起動</span>
                             )}
                           </div>
                         </div>
@@ -289,6 +297,17 @@ export default function Settings({ onClose }: SettingsProps) {
                           onChange={(e) => setFormData({ ...formData, preventDuplicate: e.target.checked })}
                         />
                         重複起動を防止
+                      </label>
+                    </div>
+
+                    <div className="form-group checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={formData.autoStart}
+                          onChange={(e) => setFormData({ ...formData, autoStart: e.target.checked })}
+                        />
+                        自動起動
                       </label>
                     </div>
                   </div>

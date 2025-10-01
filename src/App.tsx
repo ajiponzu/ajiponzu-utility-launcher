@@ -7,9 +7,11 @@ import "./App.css";
 function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [registeredApps, setRegisteredApps] = useState<RegisteredApp[]>([]);
+  const [runningApps, setRunningApps] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadRegisteredApps();
+    loadRunningApps();
   }, []);
 
   const loadRegisteredApps = async () => {
@@ -21,6 +23,28 @@ function App() {
     }
   };
 
+  const loadRunningApps = async () => {
+    try {
+      // バックエンドから実行中プロセスを取得
+      const processes = await invoke<Record<string, number>>("get_running_processes");
+      const runningAppIds = Object.keys(processes).map(key => 
+        key.includes(':name') ? key.replace(':name', '') : key
+      );
+      
+      // 自動起動が有効なアプリも実行中として扱う
+      const apps = await invoke<RegisteredApp[]>('get_registered_apps');
+      const autoStartAppIds = apps
+        .filter(app => app.auto_start && app.enabled)
+        .map(app => app.id);
+      
+      // 実行中プロセスと自動起動アプリを合わせる
+      const allRunningIds = [...new Set([...runningAppIds, ...autoStartAppIds])];
+      setRunningApps(new Set(allRunningIds));
+    } catch (error) {
+      console.error('Failed to load running apps:', error);
+    }
+  };
+
   const handleLaunchApp = async (app: RegisteredApp) => {
     try {
       await invoke("launch_application", { 
@@ -28,8 +52,32 @@ function App() {
         path: app.path, 
         arguments: app.arguments 
       });
+      
+      // 起動後に実行状態を更新
+      setRunningApps(prev => new Set([...prev, app.id]));
+      
     } catch (error) {
       console.error("Failed to launch application:", error);
+      alert(`アプリケーションの起動に失敗しました: ${error}`);
+    }
+  };
+
+  const handleStopApp = async (app: RegisteredApp) => {
+    try {
+      console.log(`Stopping app: ${app.name} (ID: ${app.id})`);
+      await invoke("stop_application", { appId: app.id });
+      
+      // 停止後に実行状態を更新
+      setRunningApps(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(app.id);
+        return newSet;
+      });
+      
+      console.log(`Successfully stopped ${app.name}`);
+    } catch (error) {
+      console.error("Failed to stop application:", error);
+      alert(`アプリケーションの停止に失敗しました: ${error}`);
     }
   };
 
@@ -44,6 +92,7 @@ function App() {
   const handleSettingsClose = () => {
     setShowSettings(false);
     loadRegisteredApps(); // 設定画面を閉じたら再読み込み
+    loadRunningApps(); // 実行状態も更新
   };
 
   return (
@@ -74,20 +123,40 @@ function App() {
           </div>
         ) : (
           <div className="apps-list">
-            {registeredApps.map((app) => (
-              <div key={app.id} className="app-item">
-                <div className="app-info">
-                  <h3>{app.name}</h3>
-                  <p>{app.description}</p>
+            {registeredApps.map((app) => {
+              const isRunning = runningApps.has(app.id);
+              return (
+                <div key={app.id} className="app-item">
+                  <div className="app-info">
+                    <h3>{app.name}</h3>
+                    <p>{app.description}</p>
+                    {app.prevent_duplicate && (
+                      <span className="prevent-duplicate-badge">重複起動禁止</span>
+                    )}
+                    {app.auto_start && (
+                      <span className="auto-start-badge">自動起動</span>
+                    )}
+                  </div>
+                  <div className="app-actions">
+                    {!isRunning ? (
+                      <button 
+                        onClick={() => handleLaunchApp(app)}
+                        className="launch-btn"
+                      >
+                        起動
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => handleStopApp(app)}
+                        className="stop-btn"
+                      >
+                        停止
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <button 
-                  onClick={() => handleLaunchApp(app)}
-                  className="launch-btn"
-                >
-                  起動
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

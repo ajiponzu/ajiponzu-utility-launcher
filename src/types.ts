@@ -9,6 +9,7 @@ export interface RegisteredApp {
   enabled: boolean;
   delay: number;
   prevent_duplicate: boolean;
+  auto_start: boolean;
 }
 
 export interface UtilityTool {
