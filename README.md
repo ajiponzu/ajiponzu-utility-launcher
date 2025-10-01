@@ -1,4 +1,10 @@
-# Tauri + React + Typescript
+# Ajiponzu Utility Launcher
+
+## Overview
+
+このアプリケーションは，開発者ajiponzuの自作アプリケーションと相性のいい？ランチャーツールです．他のツールも登録可能ですが，できれば自作アプリケーションを登録して使ってください．
+
+## Tauri + React + Typescript
 
 This template should help get you started developing with Tauri, React and Typescript in Vite.
 
