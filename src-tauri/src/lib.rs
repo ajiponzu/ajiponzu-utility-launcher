@@ -10,6 +10,12 @@ use tauri::{
     AppHandle, Manager, Runtime, Window,
 };
 
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
+#[cfg(target_os = "windows")]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
 // 登録されたアプリケーションの情報
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RegisteredApp {
@@ -218,6 +224,7 @@ async fn launch_application(
 
                 let output = Command::new("powershell")
                     .args(&["-WindowStyle", "Hidden", "-Command", &powershell_command])
+                    .creation_flags(CREATE_NO_WINDOW) // コンソールウィンドウを表示しない
                     .output()
                     .map_err(|e| format!("Failed to launch application: {}", e))?;
 
@@ -264,6 +271,7 @@ async fn launch_application(
 
                 let output = Command::new("powershell")
                     .args(&["-WindowStyle", "Hidden", "-Command", &powershell_command])
+                    .creation_flags(CREATE_NO_WINDOW) // コンソールウィンドウを表示しない
                     .output()
                     .map_err(|e| {
                         format!("Failed to launch application with Start-Process: {}", e)
@@ -371,6 +379,7 @@ fn stop_application(app: AppHandle, app_id: String) -> Result<(), String> {
                             "-Command",
                             &format!("Stop-Process -Name '{}' -Force", process_name),
                         ])
+                        .creation_flags(CREATE_NO_WINDOW) // コンソールウィンドウを表示しない
                         .output();
 
                     return match output {
@@ -419,6 +428,7 @@ fn stop_application(app: AppHandle, app_id: String) -> Result<(), String> {
                         "-Command",
                         &format!("Stop-Process -Id {} -Force", pid),
                     ])
+                    .creation_flags(CREATE_NO_WINDOW) // コンソールウィンドウを表示しない
                     .output();
 
                 return match output {
@@ -500,6 +510,7 @@ async fn launch_startup_apps(app: AppHandle) -> Result<(), String> {
                             process_name
                         ),
                     ])
+                    .creation_flags(CREATE_NO_WINDOW) // コンソールウィンドウを表示しない
                     .output();
                 // エラーは無視（プロセスが存在しない場合もあるため）
             }
