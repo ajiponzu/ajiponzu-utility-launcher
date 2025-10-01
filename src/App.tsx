@@ -16,39 +16,38 @@ function App() {
 
   const loadRegisteredApps = async () => {
     try {
-      const apps = await invoke<RegisteredApp[]>('get_registered_apps');
+      const apps = await invoke<RegisteredApp[]>("get_registered_apps");
       setRegisteredApps(apps);
     } catch (error) {
-      console.error('Failed to load registered apps:', error);
+      console.error("Failed to load registered apps:", error);
     }
   };
 
   const loadRunningApps = async () => {
     try {
-      const apps = await invoke<RegisteredApp[]>('get_registered_apps');
+      const apps = await invoke<RegisteredApp[]>("get_registered_apps");
       const autoStartAppIds = apps
-        .filter(app => app.auto_start)
-        .map(app => app.id);
+        .filter((app) => app.auto_start)
+        .map((app) => app.id);
 
       // 実行中プロセスと自動起動アプリを合わせる
       const allRunningIds = [...new Set([...autoStartAppIds])];
       setRunningApps(new Set(allRunningIds));
     } catch (error) {
-      console.error('Failed to load running apps:', error);
+      console.error("Failed to load running apps:", error);
     }
   };
 
   const handleLaunchApp = async (app: RegisteredApp) => {
     try {
-      await invoke("launch_application", { 
-        appId: app.id, 
-        path: app.path, 
-        arguments: app.arguments 
+      await invoke("launch_application", {
+        appId: app.id,
+        path: app.path,
+        arguments: app.arguments,
       });
-      
+
       // 起動後に実行状態を更新
-      setRunningApps(prev => new Set([...prev, app.id]));
-      
+      setRunningApps((prev) => new Set([...prev, app.id]));
     } catch (error) {
       console.error("Failed to launch application:", error);
       alert(`アプリケーションの起動に失敗しました: ${error}`);
@@ -59,14 +58,14 @@ function App() {
     try {
       console.log(`Stopping app: ${app.name} (ID: ${app.id})`);
       await invoke("stop_application", { appId: app.id });
-      
+
       // 停止後に実行状態を更新
-      setRunningApps(prev => {
+      setRunningApps((prev) => {
         const newSet = new Set(prev);
         newSet.delete(app.id);
         return newSet;
       });
-      
+
       console.log(`Successfully stopped ${app.name}`);
     } catch (error) {
       console.error("Failed to stop application:", error);
@@ -93,24 +92,31 @@ function App() {
       <div className="header">
         <h1>🚀 Ajiponzu Utility Launcher</h1>
         <div className="header-buttons">
-          <button 
-            className="settings-btn" 
-            onClick={() => setShowSettings(true)} 
+          <button
+            className="settings-btn"
+            onClick={() => setShowSettings(true)}
             title="設定"
           >
             ⚙️
           </button>
-          <button className="hide-btn" onClick={hideWindow} title="タスクトレイに最小化">
+          <button
+            className="hide-btn"
+            onClick={hideWindow}
+            title="タスクトレイに最小化"
+          >
             ➖
           </button>
         </div>
       </div>
-      
+
       <div className="content">
         {registeredApps.length === 0 ? (
           <div className="no-apps">
             <p>登録されたアプリケーションがありません</p>
-            <button onClick={() => setShowSettings(true)} className="add-app-btn">
+            <button
+              onClick={() => setShowSettings(true)}
+              className="add-app-btn"
+            >
               アプリを追加
             </button>
           </div>
@@ -119,7 +125,9 @@ function App() {
             {registeredApps.map((app) => {
               const isRunning = runningApps.has(app.id);
               console.log(runningApps);
-              console.log(`App: ${app.name}, ID: ${app.id}, isRunning: ${isRunning}`);
+              console.log(
+                `App: ${app.name}, ID: ${app.id}, isRunning: ${isRunning}`
+              );
               return (
                 <div key={app.id} className="app-item">
                   <div className="app-info">
@@ -128,14 +136,14 @@ function App() {
                   </div>
                   <div className="app-actions">
                     {!isRunning ? (
-                      <button 
+                      <button
                         onClick={() => handleLaunchApp(app)}
                         className="launch-btn"
                       >
                         起動
                       </button>
                     ) : (
-                      <button 
+                      <button
                         onClick={() => handleStopApp(app)}
                         className="stop-btn"
                       >

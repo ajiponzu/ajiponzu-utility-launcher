@@ -155,8 +155,8 @@ export default function Settings({ onClose }: SettingsProps) {
               <div className="apps-section">
                 <div className="section-header">
                   <h3>登録済みアプリケーション</h3>
-                  <button 
-                    className="add-btn" 
+                  <button
+                    className="add-btn"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -168,9 +168,11 @@ export default function Settings({ onClose }: SettingsProps) {
                     ➕ 追加
                   </button>
                 </div>
-                
+
                 {registeredApps.length === 0 ? (
-                  <p className="no-apps">登録されたアプリケーションがありません</p>
+                  <p className="no-apps">
+                    登録されたアプリケーションがありません
+                  </p>
                 ) : (
                   <div className="apps-list">
                     {registeredApps.map((app) => (
@@ -185,14 +187,20 @@ export default function Settings({ onClose }: SettingsProps) {
                             <p className="app-description">{app.description}</p>
                           )}
                           <div className="app-settings">
-                            <span className={`status ${app.auto_start ? 'enabled' : 'disabled'}`}>
-                              {app.auto_start ? '自動起動' : '手動起動'}
+                            <span
+                              className={`status ${
+                                app.auto_start ? "enabled" : "disabled"
+                              }`}
+                            >
+                              {app.auto_start ? "自動起動" : "手動起動"}
                             </span>
                             {app.delay && app.delay > 0 && (
                               <span className="delay">遅延: {app.delay}秒</span>
                             )}
                             {app.prevent_duplicate && (
-                              <span className="prevent-duplicate">重複起動防止</span>
+                              <span className="prevent-duplicate">
+                                重複起動防止
+                              </span>
                             )}
                             {app.auto_start && (
                               <span className="auto-start">自動起動</span>
@@ -200,10 +208,16 @@ export default function Settings({ onClose }: SettingsProps) {
                           </div>
                         </div>
                         <div className="app-actions">
-                          <button className="edit-btn" onClick={() => handleEdit(app)}>
+                          <button
+                            className="edit-btn"
+                            onClick={() => handleEdit(app)}
+                          >
                             編集
                           </button>
-                          <button className="delete-btn" onClick={() => handleDelete(app)}>
+                          <button
+                            className="delete-btn"
+                            onClick={() => handleDelete(app)}
+                          >
                             削除
                           </button>
                         </div>
@@ -216,14 +230,20 @@ export default function Settings({ onClose }: SettingsProps) {
               {/* アプリ追加・編集フォーム */}
               {showAddForm && (
                 <div className="form-section">
-                  <h3>{editingApp ? 'アプリケーション編集' : 'アプリケーション追加'}</h3>
+                  <h3>
+                    {editingApp
+                      ? "アプリケーション編集"
+                      : "アプリケーション追加"}
+                  </h3>
                   <div className="form-grid">
                     <div className="form-group">
                       <label>名前 *</label>
                       <input
                         type="text"
                         value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
                         placeholder="アプリケーション名"
                       />
                     </div>
@@ -234,7 +254,9 @@ export default function Settings({ onClose }: SettingsProps) {
                         <input
                           type="text"
                           value={formData.path}
-                          onChange={(e) => setFormData({ ...formData, path: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, path: e.target.value })
+                          }
                           placeholder="C:\path\to\app.exe"
                         />
                         <button type="button" onClick={selectFile}>
@@ -248,7 +270,12 @@ export default function Settings({ onClose }: SettingsProps) {
                       <input
                         type="text"
                         value={formData.arguments}
-                        onChange={(e) => setFormData({ ...formData, arguments: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            arguments: e.target.value,
+                          })
+                        }
                         placeholder="コマンドライン引数 (オプション)"
                       />
                     </div>
@@ -258,7 +285,12 @@ export default function Settings({ onClose }: SettingsProps) {
                       <input
                         type="text"
                         value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            description: e.target.value,
+                          })
+                        }
                         placeholder="アプリケーションの説明 (オプション)"
                       />
                     </div>
@@ -269,7 +301,12 @@ export default function Settings({ onClose }: SettingsProps) {
                         type="number"
                         min="0"
                         value={formData.delay}
-                        onChange={(e) => setFormData({ ...formData, delay: Number(e.target.value) })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            delay: Number(e.target.value),
+                          })
+                        }
                       />
                     </div>
 
@@ -278,7 +315,12 @@ export default function Settings({ onClose }: SettingsProps) {
                         <input
                           type="checkbox"
                           checked={formData.preventDuplicate}
-                          onChange={(e) => setFormData({ ...formData, preventDuplicate: e.target.checked })}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              preventDuplicate: e.target.checked,
+                            })
+                          }
                         />
                         重複起動を防止
                       </label>
@@ -289,7 +331,12 @@ export default function Settings({ onClose }: SettingsProps) {
                         <input
                           type="checkbox"
                           checked={formData.autoStart}
-                          onChange={(e) => setFormData({ ...formData, autoStart: e.target.checked })}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              autoStart: e.target.checked,
+                            })
+                          }
                         />
                         自動起動
                       </label>
@@ -298,7 +345,7 @@ export default function Settings({ onClose }: SettingsProps) {
 
                   <div className="form-actions">
                     <button className="save-btn" onClick={handleSave}>
-                      {editingApp ? '更新' : '追加'}
+                      {editingApp ? "更新" : "追加"}
                     </button>
                     <button className="cancel-btn" onClick={resetForm}>
                       キャンセル
