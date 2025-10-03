@@ -71,7 +71,16 @@ function App() {
       console.log(`Successfully stopped ${app.name}`);
     } catch (error) {
       console.error("Failed to stop application:", error);
-      alert(`アプリケーションの停止に失敗しました: ${error}`);
+      
+      // 停止に失敗した場合や既に停止していた場合は起動モードに切り替える
+      setRunningApps((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(app.id);
+        return newSet;
+      });
+      
+      console.log(`Switched ${app.name} to launch mode due to stop failure`);
+      alert(`アプリケーションの停止に失敗しました。起動モードに切り替えました: ${error}`);
     }
   };
 
